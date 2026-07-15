@@ -10,7 +10,6 @@ app = Flask(__name__)
 def home():
     return "Bot is running 24/7!"
 
-# चाबियों को सुरक्षित रूप से Render की तिजोरी से पढ़ेंगे
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
@@ -27,8 +26,9 @@ def reply_to_user(message):
         )
         bot.reply_to(message, response.text)
     except Exception as e:
+        # अगर कोई एरर आएगा, तो बॉट सीधे आपको टेलीग्राम चैट पर ही बता देगा!
         print(f"Error: {e}")
-        bot.reply_to(message, "माफ़ी चाहता हूँ, कुछ तकनीकी खराबी आ गई है।")
+        bot.reply_to(message, f"माफ़ी चाहता हूँ, जेमिनी से यह एरर आया है:\n\n`{e}`")
 
 def run_bot():
     bot.infinity_polling()
@@ -37,3 +37,5 @@ if __name__ == "__main__":
     threading.Thread(target=run_bot, daemon=True).start()
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+
+    
