@@ -4,16 +4,15 @@ from flask import Flask
 import telebot
 from google import genai
 
-# Render सर्वर को हमेशा चालू रखने के लिए Flask सेटअप
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "Bot is running 24/7!"
 
-# आपके असली टोकन और चाबी यहाँ सेट हैं
-TELEGRAM_TOKEN = "8814170626:AAFi5si4lZrlf2MRnL3-kVyiofswZJuFC8Y"
-GEMINI_API_KEY = "AIzaSyBqFfHi0dORlQKii-QpYKap0Cn072sIHME"
+# चाबियों को सुरक्षित रूप से Render की तिजोरी से पढ़ेंगे
+TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
 client = genai.Client(api_key=GEMINI_API_KEY)
@@ -35,9 +34,6 @@ def run_bot():
     bot.infinity_polling()
 
 if __name__ == "__main__":
-    # बॉट को बैकग्राउंड में चलाएं
     threading.Thread(target=run_bot, daemon=True).start()
-    
-    # Render का पोर्ट लेकर सर्वर शुरू करें
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
