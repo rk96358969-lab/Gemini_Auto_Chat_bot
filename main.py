@@ -6,36 +6,60 @@ from google import genai
 
 app = Flask(__name__)
 
-@app.route('/')
+@app.route("/")
 def home():
     return "Bot is running 24/7!"
 
-TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+# Environment Variables
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
+if not TELEGRAM_TOKEN:
+    raise ValueError("TELEGRAM_TOKEN not found!")
+
+if not GEMINI_API_KEY:
+    raise ValueError("GEMINI_API_KEY not found!")
+
+# Telegram Bot
 bot = telebot.TeleBot(TELEGRAM_TOKEN)
+
+# Gemini Client
 client = genai.Client(api_key=GEMINI_API_KEY)
+
 
 @bot.message_handler(func=lambda message: True)
 def reply_to_user(message):
     try:
-        bot.send_chat_action(message.chat.id, 'typing')
+        bot.send_chat_action(message.chat.id, "typing")
+
         response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model="gemini-2.5-flash",
             contents=message.text,
         )
-        bot.reply_to(message, response.text)
+
+        reply = response.text if response.text else "कोई उत्तर प्राप्त नहीं हुआ।"
+
+        bot.reply_to(message, reply)
+
     except Exception as e:
-        # अगर कोई एरर आएगा, तो बॉट सीधे आपको टेलीग्राम चैट पर ही बता देगा!
-        print(f"Error: {e}")
-        bot.reply_to(message, f"माफ़ी चाहता हूँ, जेमिनी से यह एरर आया है:\n\n`{e}`")
+        print("Error:", e)
+        bot.reply_to(
+            message,
+            f"❌ Error:\n{str(e)}"
+        )
+
 
 def run_bot():
-    bot.infinity_polling()
+    bot.infinity_polling(
+        timeout=30,
+        long_polling_timeout=30,
+        none_stop=True,
+        skip_pending=True
+    )
+
 
 if __name__ == "__main__":
     threading.Thread(target=run_bot, daemon=True).start()
-    port = int(os.environ.get("PORT", 8080))
-    app.run(host="0.0.0.0", port=port)
 
-    
+    port = int(os.getenv("PORT", 8080))
+    app.run(host="0.0.0.0", port=port)
