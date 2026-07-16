@@ -68,7 +68,3 @@ response = client.models.generate_content(
     contents=message.text,
 )
 model="gemini-2.5-flash"
-response = client.models.generate_content(
-    model="gemini-2.5-flash-lite",
-    contents=message.text,
-)
