@@ -63,3 +63,12 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
+response = client.models.generate_content(
+    model="gemini-2.0-flash",
+    contents=message.text,
+)
+model="gemini-2.5-flash"
+response = client.models.generate_content(
+    model="gemini-2.5-flash-lite",
+    contents=message.text,
+)
